@@ -28,7 +28,7 @@ cat > "$C/Info.plist" <<'PLIST'
 <dict>
   <key>CFBundleName</key><string>Open in Google Sheets</string>
   <key>CFBundleDisplayName</key><string>Open in Google Sheets</string>
-  <key>CFBundleIdentifier</key><string>com.madetask.OpenInSheets</string>
+  <key>CFBundleIdentifier</key><string>io.github.bsyrovatkin.OpenInSheets</string>
   <key>CFBundleExecutable</key><string>OpenInSheets</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>CFBundlePackageType</key><string>APPL</string>

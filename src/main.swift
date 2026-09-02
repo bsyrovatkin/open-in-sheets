@@ -4,7 +4,7 @@ import ServiceManagement
 
 // MARK: - Constants
 
-let kBundleID = "com.madetask.OpenInSheets"
+let kBundleID = "io.github.bsyrovatkin.OpenInSheets"
 let kUTIs = ["org.openxmlformats.spreadsheetml.sheet", "com.microsoft.excel.xls"]
 let kRemote = "gdrive"
 let kDriveFolder = "Finder Uploads"

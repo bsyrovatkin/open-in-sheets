@@ -98,7 +98,7 @@ Open in Google Sheets.app/
 проверка расположения при запуске — иначе приложение молча не работает.
 
 **AppleScript не находит его по имени.** `tell application "OpenInSheets" to quit` игнорируется,
-работает только `tell application id "com.madetask.OpenInSheets" to quit`.
+работает только `tell application id "io.github.bsyrovatkin.OpenInSheets" to quit`.
 
 ---
 
