@@ -33,8 +33,8 @@ This app removes steps two through seven.
 3. First launch: **right-click the icon → Open**. A plain double-click is blocked, because the
    app is ad-hoc signed rather than signed with an Apple Developer certificate.
 4. On first launch it asks whether to add itself to your login items.
-5. From the menu bar icon, choose **“Подключить Google Drive…”** (Connect Google Drive). A
-   browser opens; pick your account and grant access. This is a one-time step.
+5. From the menu bar icon, choose **“Connect Google Drive…”**. A browser opens; pick your
+   account and grant access. This is a one-time step.
 
 If Gatekeeper still calls the app damaged, clear the quarantine flag:
 
@@ -42,23 +42,17 @@ If Gatekeeper still calls the app damaged, clear the quarantine flag:
 xattr -dr com.apple.quarantine "/Applications/Open in Google Sheets.app"
 ```
 
-> **Note on language:** the app's own interface is in Russian. Only the documentation is in
-> English. See [Interface strings](#interface-strings) for what each menu item says.
-
 ---
 
-## Interface strings
+## The menu
 
-| Menu item | Meaning |
+| Item | What it does |
 |---|---|
-| Активно · .xlsx и .xls открываются в Sheets | Active — .xlsx and .xls open in Sheets |
-| Google Drive не подключён | Google Drive not connected |
-| Загружаю в Google Drive… | Uploading to Google Drive… |
-| Открыть папку «Finder Uploads» в Drive | Open the “Finder Uploads” folder in Drive |
-| Подключить / Переподключить Google Drive… | Connect / reconnect Google Drive |
-| Запускать при входе в систему | Launch at login |
-| О программе | About |
-| Выйти и вернуть Numbers | Quit and restore Numbers |
+| Active · .xlsx and .xls open in Sheets | Status line — also reads *Google Drive not connected* or *Uploading to Google Drive…* |
+| Open “Finder Uploads” in Drive | Opens the folder your uploads land in |
+| Connect / Reconnect Google Drive… | Runs the rclone OAuth flow |
+| Launch at login | Toggles the login item |
+| Quit and restore Numbers | Quits and hands `.xlsx` / `.xls` back |
 
 The menu bar icon dims while an upload is in flight.
 

@@ -54,7 +54,7 @@ func run(_ launchPath: String, _ args: [String], timeout: TimeInterval = 600) ->
     let outPipe = Pipe(), errPipe = Pipe()
     p.standardOutput = outPipe
     p.standardError = errPipe
-    do { try p.run() } catch { return (-1, "", "не удалось запустить \(launchPath): \(error.localizedDescription)") }
+    do { try p.run() } catch { return (-1, "", "could not launch \(launchPath): \(error.localizedDescription)") }
 
     // Read pipes on background queues so a large output cannot deadlock the process.
     var outData = Data(), errData = Data()
@@ -116,14 +116,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let dest = "\(home)/Applications/\(Bundle.main.bundleURL.lastPathComponent)"
         let move = confirm(
-            "Переместить приложение в папку «Программы»?",
-            "Сейчас оно запущено из:\n\(path)\n\n"
-            + "macOS не разрешает назначать обработчиком файлов приложение вне папки "
-            + "«Программы», поэтому отсюда оно работать не будет.",
-            ok: "Переместить и перезапустить", cancel: "Не сейчас")
+            "Move the app to your Applications folder?",
+            "It is currently running from:\n\(path)\n\n"
+            + "macOS will not let an app outside an Applications folder become a file "
+            + "handler, so it cannot do anything from here.",
+            ok: "Move and relaunch", cancel: "Not now")
         guard move else {
-            alert("Приложение работать не будет",
-                  "Перенеси «Open in Google Sheets» в папку «Программы» и запусти оттуда.")
+            alert("The app will not work from here",
+                  "Move Open in Google Sheets into your Applications folder and launch it there.")
             return true
         }
 
@@ -133,7 +133,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             if fm.fileExists(atPath: dest) { try fm.removeItem(atPath: dest) }
             try fm.copyItem(atPath: path, toPath: dest)
         } catch {
-            alert("Не удалось переместить", "\(error.localizedDescription)\n\nПеренеси приложение в «Программы» вручную.")
+            alert("Could not move the app", "\(error.localizedDescription)\n\nMove it into Applications yourself.")
             return true
         }
         log("relocated to \(dest)")
@@ -182,33 +182,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let menu = NSMenu()
 
         let status = busyCount > 0
-            ? "Загружаю в Google Drive…"
-            : (driveConnected ? "Активно · .xlsx и .xls открываются в Sheets"
-                              : "Google Drive не подключён")
+            ? "Uploading to Google Drive…"
+            : (driveConnected ? "Active · .xlsx and .xls open in Sheets"
+                              : "Google Drive not connected")
         let head = NSMenuItem(title: status, action: nil, keyEquivalent: "")
         head.isEnabled = false
         menu.addItem(head)
         menu.addItem(.separator())
 
         if driveConnected {
-            menu.addItem(item("Открыть папку «\(kDriveFolder)» в Drive", #selector(openDriveFolder)))
-            menu.addItem(item("Переподключить Google Drive…", #selector(connectDrive)))
+            menu.addItem(item("Open “\(kDriveFolder)” in Drive", #selector(openDriveFolder)))
+            menu.addItem(item("Reconnect Google Drive…", #selector(connectDrive)))
         } else {
-            let connect = item("Подключить Google Drive…", #selector(connectDrive))
+            let connect = item("Connect Google Drive…", #selector(connectDrive))
             connect.attributedTitle = NSAttributedString(
-                string: "Подключить Google Drive…",
+                string: "Connect Google Drive…",
                 attributes: [.font: NSFont.menuFont(ofSize: 0).withTrait(.boldFontMask)])
             menu.addItem(connect)
         }
 
         menu.addItem(.separator())
-        let login = item("Запускать при входе в систему", #selector(toggleLoginItem))
+        let login = item("Launch at login", #selector(toggleLoginItem))
         login.state = loginItemEnabled ? .on : .off
         menu.addItem(login)
 
         menu.addItem(.separator())
-        menu.addItem(item("О программе", #selector(about)))
-        menu.addItem(item("Выйти и вернуть Numbers", #selector(quit)))
+        menu.addItem(item("About Open in Google Sheets", #selector(about)))
+        menu.addItem(item("Quit and restore Numbers", #selector(quit)))
 
         statusItem.menu = menu
     }
@@ -285,17 +285,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         d.set(true, forKey: kDefaultsAskedLoginItem)
         guard !loginItemEnabled else { return }
         let ok = confirm(
-            "Запускать «Open in Google Sheets» при входе в систему?",
-            "Таблицы открываются в Google Sheets только пока приложение запущено. "
-            + "Если добавить его в автозапуск, оно будет включаться само после перезагрузки.\n\n"
-            + "Это можно изменить в любой момент в меню приложения.",
-            ok: "Добавить в автозапуск", cancel: "Не сейчас")
+            "Launch Open in Google Sheets at login?",
+            "Spreadsheets only open in Google Sheets while this app is running. "
+            + "Adding it to your login items starts it for you after a restart.\n\n"
+            + "You can change this at any time from the app’s menu.",
+            ok: "Add to login items", cancel: "Not now")
         if ok {
             setLoginItem(true)
             if !loginItemEnabled {
-                alert("Не удалось добавить в автозапуск",
-                      "Открой Системные настройки → Основные → Объекты входа и добавь "
-                      + "«Open in Google Sheets» вручную.")
+                alert("Could not add it to your login items",
+                      "Open System Settings → General → Login Items and add "
+                      + "Open in Google Sheets there.")
             }
         }
     }
@@ -314,11 +314,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             ? ["config", "reconnect", "\(kRemote):", "--auto-confirm"]
             : ["config", "create", kRemote, "drive", "scope=drive"]
 
-        guard confirm("Подключение Google Drive",
-                      "Сейчас откроется браузер — выбери аккаунт Google и разреши доступ.\n\n"
-                      + "Окно с этим сообщением закроется, а по итогам подключения появится "
-                      + "уведомление. Это нужно сделать один раз.",
-                      ok: "Открыть браузер", cancel: "Отмена") else { return }
+        guard confirm("Connect Google Drive",
+                      "A browser window will open — pick your Google account and grant access.\n\n"
+                      + "This message closes now; you will get another one when the connection "
+                      + "finishes. You only need to do this once.",
+                      ok: "Open browser", cancel: "Cancel") else { return }
 
         setBusy(true)
         DispatchQueue.global().async {
@@ -326,10 +326,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             DispatchQueue.main.async {
                 self.setBusy(false)
                 if self.driveConnected {
-                    alert("Google Drive подключён", "Теперь двойной клик по .xlsx или .xls "
-                          + "откроет файл в Google Таблицах.", style: .informational)
+                    alert("Google Drive connected", "Double-clicking an .xlsx or .xls now opens it "
+                          + "as a Google Sheet.", style: .informational)
                 } else {
-                    alert("Не удалось подключить Google Drive",
+                    alert("Could not connect Google Drive",
                           (r.err.isEmpty ? r.out : r.err).suffix(600).description)
                 }
                 self.rebuildMenu()
@@ -363,13 +363,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func handle(_ url: URL) {
         log("open request: \(url.path)")
         guard driveConnected else {
-            alert("Google Drive не подключён",
-                  "Открой меню «Open in Google Sheets» в строке меню и выбери "
-                  + "«Подключить Google Drive…».")
+            alert("Google Drive not connected",
+                  "Open the Open in Google Sheets menu in the menu bar and choose "
+                  + "“Connect Google Drive…”.")
             return
         }
         guard FileManager.default.fileExists(atPath: url.path) else {
-            alert("Файл не найден", url.path)
+            alert("File not found", url.path)
             return
         }
 
@@ -389,8 +389,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             guard copy.code == 0 else {
                 DispatchQueue.main.async {
                     self.setBusy(false)
-                    alert("Не удалось загрузить файл в Google Drive",
-                          copy.err.isEmpty ? "rclone завершился с кодом \(copy.code)"
+                    alert("Could not upload the file to Google Drive",
+                          copy.err.isEmpty ? "rclone exited with code \(copy.code)"
                                            : String(copy.err.suffix(600)))
                 }
                 return
@@ -406,8 +406,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             DispatchQueue.main.async {
                 self.setBusy(false)
                 guard let id = fileID else {
-                    alert("Файл загрузился, но ссылку получить не удалось",
-                          "Проверь папку «\(kDriveFolder)» в Google Drive.")
+                    alert("Uploaded, but could not build a link",
+                          "Check the “\(kDriveFolder)” folder in Google Drive.")
                     return
                 }
                 log("uploaded \(url.lastPathComponent) -> \(id)")
@@ -422,12 +422,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func about() {
         let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         alert("Open in Google Sheets \(v)",
-              "Пока приложение запущено, двойной клик по .xlsx и .xls заливает файл "
-              + "в Google Drive (папка «\(kDriveFolder)»), конвертирует в Google Таблицу "
-              + "и открывает её в браузере.\n\n"
-              + "При выходе из приложения эти типы файлов возвращаются Numbers.\n\n"
-              + "Внимание: в Drive создаётся копия. Правки в Таблице не попадают обратно "
-              + "в локальный файл.",
+              "While this app is running, double-clicking an .xlsx or .xls uploads it to "
+              + "Google Drive (the “\(kDriveFolder)” folder), converts it to a Google Sheet "
+              + "and opens it in your browser.\n\n"
+              + "Quitting hands both file types back to Numbers.\n\n"
+              + "Note: Drive gets a copy. Edits in the Sheet do not flow back into the "
+              + "local file.",
               style: .informational)
     }
 
