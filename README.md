@@ -4,23 +4,38 @@
 заливает файл в Google Drive, конвертирует в Google Таблицу и открывает её в браузере.
 Вышел из приложения — эти файлы снова открываются в Numbers.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/infographic-dark.png">
+  <img alt="Было — 7 действий на файл: выгрузил, открылся Numbers, закрыл, открыл Drive, перетащил, дождался загрузки, открыл через Google Таблицы. Стало — 1 действие: двойной клик." src="docs/infographic-light.png">
+</picture>
+
+---
+
+## Зачем
+
+Выгрузка из бэк-офиса падает в «Загрузки», двойной клик отдаёт её Numbers — а работа идёт
+в Google Таблицах. Ссылку из Numbers не дать, совместно не поработать, а если Excel не
+установлен, то альтернативы нет вообще: остаётся каждый раз вручную тащить файл в Drive.
+
+Это приложение убирает шаги со второго по седьмой.
+
 **Требования:** macOS 13+, Apple Silicon.
 
 ---
 
 ## Установка
 
-1. Распаковать `Open in Google Sheets.zip`.
+1. Скачать `Open in Google Sheets.zip` из [Releases](../../releases) и распаковать.
 2. **Перетащить приложение в «Программы».** Это обязательно: macOS не разрешает назначать
    обработчиком файлов приложение, лежащее в «Загрузках» или во временной папке. Если запустить
    оттуда, приложение само предложит себя переместить.
-3. Первый запуск — **правый клик по иконке → «Открыть»** (обычный двойной клик macOS заблокирует,
-   потому что приложение не подписано в Apple). Дальше запускается как обычно.
-4. При первом запуске спросит, добавить ли себя в автозапуск.
-5. В меню в трее выбрать **«Подключить Google Drive…»** — откроется браузер, нужно выбрать аккаунт
-   и разрешить доступ. Делается один раз.
+3. Первый запуск — **правый клик по иконке → «Открыть»**. Обычный двойной клик macOS
+   заблокирует: приложение подписано ad-hoc, а не сертификатом Apple Developer.
+4. При первом запуске приложение спросит, добавить ли себя в автозапуск.
+5. В меню в трее выбрать **«Подключить Google Drive…»** — откроется браузер, нужно выбрать
+   аккаунт и разрешить доступ. Делается один раз.
 
-Если Gatekeeper всё же ругается «повреждено», снять карантин:
+Если Gatekeeper всё же говорит «повреждено», снять карантин:
 
 ```bash
 xattr -dr com.apple.quarantine "/Applications/Open in Google Sheets.app"
@@ -28,9 +43,7 @@ xattr -dr com.apple.quarantine "/Applications/Open in Google Sheets.app"
 
 ---
 
-## Как пользоваться
-
-Иконка таблицы в строке меню. Меню:
+## Меню
 
 | Пункт | Что делает |
 |---|---|
@@ -38,7 +51,7 @@ xattr -dr com.apple.quarantine "/Applications/Open in Google Sheets.app"
 | Открыть папку «Finder Uploads» в Drive | Куда складываются загруженные файлы |
 | Подключить / Переподключить Google Drive | OAuth-авторизация rclone |
 | Запускать при входе в систему | Галка автозапуска |
-| Выйти и вернуть Numbers | Выход + возврат обработчика `.xlsx`/`.xls` |
+| Выйти и вернуть Numbers | Выход + возврат обработчика `.xlsx` / `.xls` |
 
 Во время загрузки иконка в трее блёкнет.
 
@@ -46,36 +59,46 @@ xattr -dr com.apple.quarantine "/Applications/Open in Google Sheets.app"
 
 ## Что важно понимать
 
-- **В Drive создаётся копия.** Google Sheets не умеет редактировать локальный файл. Правки
-  в Таблице обратно в файл на диске не попадают.
+- **В Drive создаётся копия.** Google Sheets не умеет редактировать локальный файл, поэтому
+  правки в Таблице не попадают обратно в `.xlsx` на диске.
 - **Каждое открытие — новая копия** в подпапке с таймстампом внутри `Finder Uploads`.
   Папка растёт, раз в пару месяцев стоит чистить.
-- **Работает только пока приложение запущено.** Это и было задумано: вышел — вернулся Numbers.
-- Если приложение убить через Force Quit, обработчик останется на нём. Не страшно: следующий
-  двойной клик по `.xlsx` просто запустит приложение снова.
-- Откатить вручную: Finder → `Cmd+I` на любом `.xlsx` → «Открыть в программе» → Numbers →
-  «Настроить все».
+- **Работает только пока приложение запущено.** Это и было задумано.
+- Если убить приложение через Force Quit, обработчик останется на нём. Не страшно: следующий
+  двойной клик по `.xlsx` просто запустит его снова.
+- Откатить вручную: Finder → <kbd>Cmd</kbd>+<kbd>I</kbd> на любом `.xlsx` → «Открыть
+  в программе» → Numbers → «Настроить все».
 
-**Лог:** `~/Library/Logs/OpenInSheets.log` — туда пишутся запуск, выход и каждая загрузка.
+**Лог:** `~/Library/Logs/OpenInSheets.log` — запуск, выход и каждая загрузка.
 
 ---
 
-## Что внутри
+## Как устроено
 
 ```
 Open in Google Sheets.app/
-  Contents/MacOS/OpenInSheets    Swift + AppKit, LSUIElement (без иконки в доке)
-  Contents/Resources/rclone      rclone 1.75.0 (arm64), лежит внутри — ставить отдельно не надо
+  Contents/MacOS/OpenInSheets     Swift + AppKit, LSUIElement (без иконки в доке)
+  Contents/Resources/rclone       rclone (arm64), вшит — ставить отдельно не надо
   Contents/Resources/AppIcon.icns
 ```
 
-Обработчик типа файла переключается через `LSSetDefaultRoleHandlerForContentType`:
-при запуске приложение запоминает текущего владельца `.xlsx`/`.xls` и ставит себя, при выходе
-возвращает запомненного (по умолчанию Numbers). Конфиг Google Drive — обычный rclone-конфиг
-в `~/.config/rclone/rclone.conf`, remote называется `gdrive`.
+Обработчик типа файла переключается через `LSSetDefaultRoleHandlerForContentType`: при запуске
+приложение запоминает текущего владельца `.xlsx` / `.xls` и ставит себя, при выходе возвращает
+запомненного (по умолчанию Numbers).
 
-Загрузка: `rclone copy <файл> gdrive:"Finder Uploads"/<timestamp>/ --drive-import-formats xlsx,xls`,
-затем `rclone lsjson` за ID файла и переход на `docs.google.com/spreadsheets/d/<id>/edit`.
+Конфиг Google Drive — обычный rclone-конфиг в `~/.config/rclone/rclone.conf`, remote называется
+`gdrive`. Загрузка: `rclone copy <файл> gdrive:"Finder Uploads"/<timestamp>/
+--drive-import-formats xlsx,xls`, затем `rclone lsjson` за ID файла и переход на
+`docs.google.com/spreadsheets/d/<id>/edit`.
+
+### Две неочевидные вещи
+
+**LaunchServices игнорирует приложения вне «Программ».** Попытка назначить обработчиком
+приложение из `/private/tmp` или «Загрузок» проходит без ошибки, но ничего не меняет. Отсюда
+проверка расположения при запуске — иначе приложение молча не работает.
+
+**AppleScript не находит его по имени.** `tell application "OpenInSheets" to quit` игнорируется,
+работает только `tell application id "com.madetask.OpenInSheets" to quit`.
 
 ---
 
@@ -85,9 +108,17 @@ Open in Google Sheets.app/
 ./src/build.sh
 ```
 
-Нужны Xcode Command Line Tools (`swiftc`) и `~/bin/rclone`. Скрипт компилирует, собирает бандл,
-подписывает ad-hoc и регистрирует в LaunchServices. Иконки перегенерируются отдельно:
-`python3 src/makeicons.py && iconutil -c icns build/AppIcon.iconset -o build/AppIcon.icns`.
+Нужны Xcode Command Line Tools (`swiftc`) и rclone в `~/bin/rclone`. Скрипт компилирует, собирает
+бандл, подписывает ad-hoc и регистрирует в LaunchServices. Иконки перегенерируются отдельно:
 
-Сборка идёт во временную папку, а не в `Documents`: на директории под управлением file provider
-(iCloud/Dropbox) macOS вешает `com.apple.FinderInfo`, и `codesign` из-за этого падает.
+```bash
+python3 src/makeicons.py && iconutil -c icns build/AppIcon.iconset -o build/AppIcon.icns
+```
+
+Сборка идёт во временную папку, а не в `Documents`: на директориях под управлением file provider
+(iCloud, Dropbox) macOS вешает `com.apple.FinderInfo`, и `codesign` из-за этого падает
+с «resource fork, Finder information, or similar detritus not allowed».
+
+---
+
+Личный инструмент, не связан с Apple и Google. Подписан ad-hoc, без нотаризации.
