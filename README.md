@@ -1,124 +1,141 @@
 # Open in Google Sheets
 
-Приложение в строке меню для macOS. Пока оно запущено, двойной клик по `.xlsx` и `.xls`
-заливает файл в Google Drive, конвертирует в Google Таблицу и открывает её в браузере.
-Вышел из приложения — эти файлы снова открываются в Numbers.
+A macOS menu bar app. While it is running, double-clicking an `.xlsx` or `.xls` uploads the file
+to Google Drive, converts it to a Google Sheet and opens it in your browser. Quit the app and
+those file types go back to Numbers.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/infographic-dark.png">
-  <img alt="Было — 7 действий на файл: выгрузил, открылся Numbers, закрыл, открыл Drive, перетащил, дождался загрузки, открыл через Google Таблицы. Стало — 1 действие: двойной клик." src="docs/infographic-light.png">
+  <img alt="Before: seven steps per file — export the .xlsx, double-click, Numbers opens, close Numbers, open drive.google.com, drag the file in, wait for the upload, right-click and open with Google Sheets. After: one step — double-click." src="docs/infographic-light.png">
 </picture>
 
 ---
 
-## Зачем
+## Why
 
-Выгрузка из бэк-офиса падает в «Загрузки», двойной клик отдаёт её Numbers — а работа идёт
-в Google Таблицах. Ссылку из Numbers не дать, совместно не поработать, а если Excel не
-установлен, то альтернативы нет вообще: остаётся каждый раз вручную тащить файл в Drive.
+Your export lands in Downloads. A double-click hands it to Numbers — but the work happens in
+Google Sheets. Numbers gives you a file to email around, not a link, comments and two people in
+the same sheet. And without Excel installed there is no second option: dragging every file into
+Drive by hand *is* the workflow.
 
-Это приложение убирает шаги со второго по седьмой.
+This app removes steps two through seven.
 
-**Требования:** macOS 13+, Apple Silicon.
+**Requirements:** macOS 13+, Apple Silicon.
 
 ---
 
-## Установка
+## Install
 
-1. Скачать `Open in Google Sheets.zip` из [Releases](../../releases) и распаковать.
-2. **Перетащить приложение в «Программы».** Это обязательно: macOS не разрешает назначать
-   обработчиком файлов приложение, лежащее в «Загрузках» или во временной папке. Если запустить
-   оттуда, приложение само предложит себя переместить.
-3. Первый запуск — **правый клик по иконке → «Открыть»**. Обычный двойной клик macOS
-   заблокирует: приложение подписано ad-hoc, а не сертификатом Apple Developer.
-4. При первом запуске приложение спросит, добавить ли себя в автозапуск.
-5. В меню в трее выбрать **«Подключить Google Drive…»** — откроется браузер, нужно выбрать
-   аккаунт и разрешить доступ. Делается один раз.
+1. Download `Open in Google Sheets.zip` from [Releases](../../releases) and unpack it.
+2. **Drag the app into your Applications folder.** This is required — macOS will not let an app
+   in Downloads or a temp directory become a file handler. If you launch it from there, the app
+   offers to relocate itself.
+3. First launch: **right-click the icon → Open**. A plain double-click is blocked, because the
+   app is ad-hoc signed rather than signed with an Apple Developer certificate.
+4. On first launch it asks whether to add itself to your login items.
+5. From the menu bar icon, choose **“Подключить Google Drive…”** (Connect Google Drive). A
+   browser opens; pick your account and grant access. This is a one-time step.
 
-Если Gatekeeper всё же говорит «повреждено», снять карантин:
+If Gatekeeper still calls the app damaged, clear the quarantine flag:
 
 ```bash
 xattr -dr com.apple.quarantine "/Applications/Open in Google Sheets.app"
 ```
 
+> **Note on language:** the app's own interface is in Russian. Only the documentation is in
+> English. See [Interface strings](#interface-strings) for what each menu item says.
+
 ---
 
-## Меню
+## Interface strings
 
-| Пункт | Что делает |
+| Menu item | Meaning |
 |---|---|
-| Строка статуса | «Активно» / «Google Drive не подключён» / «Загружаю…» |
-| Открыть папку «Finder Uploads» в Drive | Куда складываются загруженные файлы |
-| Подключить / Переподключить Google Drive | OAuth-авторизация rclone |
-| Запускать при входе в систему | Галка автозапуска |
-| Выйти и вернуть Numbers | Выход + возврат обработчика `.xlsx` / `.xls` |
+| Активно · .xlsx и .xls открываются в Sheets | Active — .xlsx and .xls open in Sheets |
+| Google Drive не подключён | Google Drive not connected |
+| Загружаю в Google Drive… | Uploading to Google Drive… |
+| Открыть папку «Finder Uploads» в Drive | Open the “Finder Uploads” folder in Drive |
+| Подключить / Переподключить Google Drive… | Connect / reconnect Google Drive |
+| Запускать при входе в систему | Launch at login |
+| О программе | About |
+| Выйти и вернуть Numbers | Quit and restore Numbers |
 
-Во время загрузки иконка в трее блёкнет.
-
----
-
-## Что важно понимать
-
-- **В Drive создаётся копия.** Google Sheets не умеет редактировать локальный файл, поэтому
-  правки в Таблице не попадают обратно в `.xlsx` на диске.
-- **Каждое открытие — новая копия** в подпапке с таймстампом внутри `Finder Uploads`.
-  Папка растёт, раз в пару месяцев стоит чистить.
-- **Работает только пока приложение запущено.** Это и было задумано.
-- Если убить приложение через Force Quit, обработчик останется на нём. Не страшно: следующий
-  двойной клик по `.xlsx` просто запустит его снова.
-- Откатить вручную: Finder → <kbd>Cmd</kbd>+<kbd>I</kbd> на любом `.xlsx` → «Открыть
-  в программе» → Numbers → «Настроить все».
-
-**Лог:** `~/Library/Logs/OpenInSheets.log` — запуск, выход и каждая загрузка.
+The menu bar icon dims while an upload is in flight.
 
 ---
 
-## Как устроено
+## What to keep in mind
+
+- **Drive gets a copy.** Google Sheets cannot edit a local file, so edits in the Sheet do not
+  flow back into the `.xlsx` on disk.
+- **Every open makes a new copy**, in a timestamped subfolder inside `Finder Uploads`. The
+  folder grows; clear it out every couple of months.
+- **It only works while the app is running.** That is the design.
+- If you force-quit the app, it stays registered as the handler. Harmless — the next double-click
+  on an `.xlsx` simply launches it again.
+- To undo by hand: Finder → <kbd>Cmd</kbd>+<kbd>I</kbd> on any `.xlsx` → Open with → Numbers →
+  Change All.
+
+**Log:** `~/Library/Logs/OpenInSheets.log` records launches, quits and every upload.
+
+---
+
+## How it works
 
 ```
 Open in Google Sheets.app/
-  Contents/MacOS/OpenInSheets     Swift + AppKit, LSUIElement (без иконки в доке)
-  Contents/Resources/rclone       rclone (arm64), вшит — ставить отдельно не надо
+  Contents/MacOS/OpenInSheets     Swift + AppKit, LSUIElement (no Dock icon)
+  Contents/Resources/rclone       rclone (arm64), bundled — nothing to install separately
   Contents/Resources/AppIcon.icns
 ```
 
-Обработчик типа файла переключается через `LSSetDefaultRoleHandlerForContentType`: при запуске
-приложение запоминает текущего владельца `.xlsx` / `.xls` и ставит себя, при выходе возвращает
-запомненного (по умолчанию Numbers).
+The file handler is swapped through `LSSetDefaultRoleHandlerForContentType`: on launch the app
+records whoever currently owns `.xlsx` / `.xls` and installs itself; on quit it hands the types
+back to whoever it recorded (Numbers by default).
 
-Конфиг Google Drive — обычный rclone-конфиг в `~/.config/rclone/rclone.conf`, remote называется
-`gdrive`. Загрузка: `rclone copy <файл> gdrive:"Finder Uploads"/<timestamp>/
---drive-import-formats xlsx,xls`, затем `rclone lsjson` за ID файла и переход на
+Google Drive access is a plain rclone config at `~/.config/rclone/rclone.conf`, with a remote
+named `gdrive`. An upload runs `rclone copy <file> gdrive:"Finder Uploads"/<timestamp>/
+--drive-import-formats xlsx,xls`, then `rclone lsjson` to read the new file's ID, then opens
 `docs.google.com/spreadsheets/d/<id>/edit`.
 
-### Две неочевидные вещи
+### Two things that are easy to get wrong
 
-**LaunchServices игнорирует приложения вне «Программ».** Попытка назначить обработчиком
-приложение из `/private/tmp` или «Загрузок» проходит без ошибки, но ничего не меняет. Отсюда
-проверка расположения при запуске — иначе приложение молча не работает.
+**LaunchServices silently ignores apps outside an Applications folder.** Setting an app in
+`/private/tmp` or `~/Downloads` as the default handler returns success and changes nothing.
+Hence the location check on launch — without it the app just quietly does nothing.
 
-**AppleScript не находит его по имени.** `tell application "OpenInSheets" to quit` игнорируется,
-работает только `tell application id "io.github.bsyrovatkin.OpenInSheets" to quit`.
+**AppleScript cannot find it by name.** `tell application "OpenInSheets" to quit` is ignored;
+only `tell application id "io.github.bsyrovatkin.OpenInSheets" to quit` works.
 
 ---
 
-## Сборка из исходников
+## Building from source
 
 ```bash
 ./src/build.sh
 ```
 
-Нужны Xcode Command Line Tools (`swiftc`) и rclone в `~/bin/rclone`. Скрипт компилирует, собирает
-бандл, подписывает ad-hoc и регистрирует в LaunchServices. Иконки перегенерируются отдельно:
+Needs Xcode Command Line Tools (`swiftc`) and rclone at `~/bin/rclone`. The script compiles the
+binary, assembles the bundle, signs it ad-hoc and registers it with LaunchServices. Icons are
+regenerated separately:
 
 ```bash
 python3 src/makeicons.py && iconutil -c icns build/AppIcon.iconset -o build/AppIcon.icns
 ```
 
-Сборка идёт во временную папку, а не в `Documents`: на директориях под управлением file provider
-(iCloud, Dropbox) macOS вешает `com.apple.FinderInfo`, и `codesign` из-за этого падает
-с «resource fork, Finder information, or similar detritus not allowed».
+The build stages into a temp directory rather than building in place. On directories managed by
+a file provider (iCloud, Dropbox) macOS attaches `com.apple.FinderInfo`, which makes `codesign`
+fail with *resource fork, Finder information, or similar detritus not allowed*.
+
+The infographic above is a standalone page — `docs/infographic.html`. Re-render it with headless
+Chrome at `1600×690`:
+
+```bash
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new \
+  --force-device-scale-factor=2 --window-size=1600,690 --virtual-time-budget=9000 \
+  --screenshot=docs/infographic-light.png "file://$PWD/docs/infographic.html"
+```
 
 ---
 
-Личный инструмент, не связан с Apple и Google. Подписан ad-hoc, без нотаризации.
+A personal tool. Not affiliated with Apple or Google. Ad-hoc signed, not notarized.

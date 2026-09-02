@@ -1,7 +1,7 @@
-<title>Мимо Numbers</title>
+<title>Straight to Sheets</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap">
 
 <style>
 :root{
@@ -10,410 +10,245 @@
   --surface-2:#F0F4F2;
   --ink:#12211C;
   --ink-2:#3A4E46;
-  --muted:#66796F;
+  --muted:#6B7E74;
   --line:#DCE5E0;
   --line-soft:#E9EFEC;
   --accent:#0B8043;
   --accent-soft:#E4F3EA;
   --pain:#B4483C;
   --pain-soft:#F8EAE8;
-  --shadow:0 1px 0 rgba(18,33,28,.05), 0 8px 28px -18px rgba(18,33,28,.35);
-
   --sans:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
   --mono:"IBM Plex Mono","SF Mono",Menlo,monospace;
   --cond:"IBM Plex Sans Condensed","IBM Plex Sans",Arial,sans-serif;
-  --cell:46px;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --ground:#0E1512;
-    --surface:#151E1A;
-    --surface-2:#1B2622;
-    --ink:#E6EFE9;
-    --ink-2:#BACCC3;
-    --muted:#8DA298;
-    --line:#26332D;
-    --line-soft:#1E2A25;
-    --accent:#3DD68C;
-    --accent-soft:#14342A;
-    --pain:#E88474;
-    --pain-soft:#33201D;
-    --shadow:0 1px 0 rgba(0,0,0,.4), 0 10px 30px -20px rgba(0,0,0,.9);
+    --ground:#0E1512; --surface:#151E1A; --surface-2:#1B2622;
+    --ink:#E6EFE9; --ink-2:#BACCC3; --muted:#8DA298;
+    --line:#26332D; --line-soft:#1E2A25;
+    --accent:#3DD68C; --accent-soft:#14342A;
+    --pain:#E88474; --pain-soft:#33201D;
   }
 }
 :root[data-theme="dark"]{
-  --ground:#0E1512;
-  --surface:#151E1A;
-  --surface-2:#1B2622;
-  --ink:#E6EFE9;
-  --ink-2:#BACCC3;
-  --muted:#8DA298;
-  --line:#26332D;
-  --line-soft:#1E2A25;
-  --accent:#3DD68C;
-  --accent-soft:#14342A;
-  --pain:#E88474;
-  --pain-soft:#33201D;
-  --shadow:0 1px 0 rgba(0,0,0,.4), 0 10px 30px -20px rgba(0,0,0,.9);
+  --ground:#0E1512; --surface:#151E1A; --surface-2:#1B2622;
+  --ink:#E6EFE9; --ink-2:#BACCC3; --muted:#8DA298;
+  --line:#26332D; --line-soft:#1E2A25;
+  --accent:#3DD68C; --accent-soft:#14342A;
+  --pain:#E88474; --pain-soft:#33201D;
 }
 
 *{box-sizing:border-box}
+html,body{height:100%}
 body{
-  margin:0;
-  background:var(--ground);
-  color:var(--ink);
-  font-family:var(--sans);
-  font-size:16px;
-  line-height:1.55;
-  -webkit-font-smoothing:antialiased;
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--sans); -webkit-font-smoothing:antialiased;
+  display:grid; place-items:center; overflow:hidden;
 }
+.stage{width:100%; height:100%; display:grid; place-items:center}
 
-/* ---------- лист ---------- */
-.sheet{
-  max-width:1080px;
-  margin:0 auto;
+.slide{
+  width:1600px; height:690px; flex:none;
+  transform-origin:center center;
   background-color:var(--ground);
   background-image:
     linear-gradient(to right, var(--line-soft) 1px, transparent 1px),
     linear-gradient(to bottom, var(--line-soft) 1px, transparent 1px);
-  background-size:var(--cell) var(--cell);
-  background-position:-1px -1px;
-  border-left:1px solid var(--line);
-  border-right:1px solid var(--line);
-  min-height:100vh;
+  background-size:50px 50px;
+  display:grid; grid-template-rows:auto 1fr auto;
+  border:1px solid var(--line);
+  overflow:hidden;
 }
 
-/* ---------- хром таблицы ---------- */
-.chrome{
-  position:sticky; top:0; z-index:20;
-  background:var(--surface);
+/* formula bar */
+.bar{
+  display:flex; align-items:center; gap:14px;
+  padding:11px 22px; background:var(--surface);
   border-bottom:1px solid var(--line);
-}
-.formula-bar{
-  display:flex; align-items:center; gap:12px;
-  padding:9px 14px;
-  border-bottom:1px solid var(--line-soft);
-  font-family:var(--mono); font-size:12px; color:var(--muted);
+  font-family:var(--mono); font-size:13px; color:var(--muted);
 }
 .namebox{
-  font-weight:500; color:var(--ink-2);
-  border:1px solid var(--line); border-radius:3px;
-  padding:2px 9px; background:var(--surface-2);
-  min-width:62px; text-align:center;
+  color:var(--ink-2); border:1px solid var(--line); border-radius:3px;
+  padding:2px 12px; background:var(--surface-2); font-weight:500;
 }
 .fx{color:var(--line); font-style:italic}
-.formula-bar .val{color:var(--ink-2); overflow:hidden; white-space:nowrap; text-overflow:ellipsis}
-.colhead{
-  display:grid; grid-template-columns:34px repeat(8,1fr);
-  font-family:var(--mono); font-size:10.5px; letter-spacing:.1em;
-  color:var(--muted); background:var(--surface-2);
-}
-.colhead span{
-  text-align:center; padding:3px 0;
-  border-right:1px solid var(--line-soft);
-}
-.colhead span:first-child{background:var(--surface-2)}
+.bar .brand{margin-left:auto; color:var(--accent); font-weight:500; letter-spacing:.02em}
 
-/* ---------- строки листа ---------- */
-.row{
-  display:grid;
-  grid-template-columns:34px minmax(0,1fr);
-  border-bottom:1px solid var(--line);
-}
-.rownum{
-  font-family:var(--mono); font-size:10.5px;
-  color:var(--muted); text-align:center;
-  padding-top:16px;
-  background:var(--surface-2);
-  border-right:1px solid var(--line);
-  user-select:none;
-}
-.body{padding:34px 30px 38px}
+/* main */
+.main{display:grid; grid-template-columns:600px 1fr; min-height:0}
 
+.left{padding:36px 40px 26px 44px; display:flex; flex-direction:column; border-right:1px solid var(--line)}
 .eyebrow{
-  font-family:var(--cond); font-weight:700;
-  font-size:12px; letter-spacing:.16em; text-transform:uppercase;
-  color:var(--muted); margin:0 0 14px;
+  font-family:var(--cond); font-weight:700; font-size:12px;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--muted);
+  margin:0 0 18px;
 }
-.eyebrow .ref{color:var(--accent)}
-
-/* ---------- герой ---------- */
-.hero .body{padding-top:48px; padding-bottom:46px}
 h1{
   font-family:var(--mono); font-weight:600;
-  font-size:clamp(30px,5.1vw,54px);
-  line-height:1.07; letter-spacing:-.035em;
-  margin:0; text-wrap:balance;
-  max-width:16ch;
+  font-size:44px; line-height:1.06; letter-spacing:-.038em;
+  margin:0; max-width:12ch;
 }
 .selected{
   position:relative; display:inline-block;
-  padding:10px 16px; margin:-10px -16px;
-  background:var(--surface);
-  outline:2px solid var(--accent);
-  outline-offset:0;
+  padding:9px 14px; margin:-9px -14px;
+  background:var(--surface); outline:2px solid var(--accent);
 }
 .selected::after{
   content:""; position:absolute; right:-4px; bottom:-4px;
   width:8px; height:8px; background:var(--accent);
   border:1.5px solid var(--surface);
 }
-.lede{
-  margin:34px 0 0; max-width:62ch;
-  font-size:17.5px; color:var(--ink-2);
-}
+.lede{margin:30px 0 0; font-size:16.5px; line-height:1.55; color:var(--ink-2); max-width:44ch}
 .lede b{color:var(--ink); font-weight:600}
 
-/* ---------- две боли ---------- */
-.pains{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line)}
-.pain-cell{background:var(--ground); padding:30px}
-.tag{
-  display:inline-block; font-family:var(--mono); font-size:11px;
-  letter-spacing:.06em; padding:3px 9px; border-radius:2px;
-  background:var(--pain-soft); color:var(--pain);
-  border:1px solid color-mix(in srgb, var(--pain) 26%, transparent);
-  margin-bottom:16px;
+.pains{display:flex; flex-direction:column; gap:9px; padding-top:30px}
+.pain{
+  display:grid; grid-template-columns:auto 1fr; gap:12px; align-items:start;
+  background:var(--pain-soft); border-left:3px solid var(--pain);
+  padding:11px 14px; font-size:14px; color:var(--ink-2); line-height:1.45;
 }
-.pain-cell h3{
-  font-family:var(--mono); font-weight:600; font-size:19px;
-  letter-spacing:-.02em; line-height:1.28; margin:0 0 12px;
+.pain b{
+  font-family:var(--cond); font-weight:700; font-size:11px;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--pain);
+  padding-top:2px; white-space:nowrap;
 }
-.pain-cell p{margin:0; color:var(--ink-2); font-size:15px}
-.pain-cell p + p{margin-top:11px}
 
-/* ---------- сравнение ---------- */
-.compare{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line)}
-.col{background:var(--ground); padding:28px 30px 34px; display:flex; flex-direction:column}
-.col-head{display:flex; align-items:baseline; gap:14px; margin-bottom:22px}
+/* comparison */
+.right{display:grid; grid-template-columns:1fr 1fr; min-height:0}
+.col{padding:30px 34px 26px; display:flex; flex-direction:column; min-height:0}
+.col + .col{border-left:1px solid var(--line)}
+.col.after{background:var(--surface-2)}
+.chead{display:flex; align-items:baseline; gap:14px; margin-bottom:20px}
 .bignum{
-  font-family:var(--cond); font-weight:700;
-  font-size:64px; line-height:.82; letter-spacing:-.03em;
-  font-variant-numeric:tabular-nums;
+  font-family:var(--cond); font-weight:700; font-size:56px;
+  line-height:.8; letter-spacing:-.03em; font-variant-numeric:tabular-nums;
 }
-.col-label{font-family:var(--cond); font-weight:700; font-size:13px; letter-spacing:.14em; text-transform:uppercase}
-.col-sub{font-size:13.5px; color:var(--muted); margin-top:3px}
-.col.before .bignum,.col.before .col-label{color:var(--pain)}
-.col.after  .bignum,.col.after  .col-label{color:var(--accent)}
+.clabel{font-family:var(--cond); font-weight:700; font-size:13px; letter-spacing:.16em; text-transform:uppercase}
+.csub{font-size:12.5px; color:var(--muted); margin-top:4px}
+.before .bignum,.before .clabel{color:var(--pain)}
+.after  .bignum,.after  .clabel{color:var(--accent)}
 
-.steps{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1px; flex:1}
+.steps{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:5px}
 .steps li{
-  display:grid; grid-template-columns:26px 1fr; gap:12px; align-items:start;
+  display:grid; grid-template-columns:24px 1fr; gap:10px; align-items:baseline;
   background:var(--surface); border:1px solid var(--line);
-  padding:11px 13px; font-size:14.5px; color:var(--ink-2);
+  border-left:3px solid var(--pain);
+  padding:8px 12px; font-size:14px; line-height:1.35; color:var(--ink-2);
 }
-.steps li .n{
-  font-family:var(--mono); font-size:11px; color:var(--muted);
-  padding-top:3px; font-variant-numeric:tabular-nums;
+.steps li .n{font-family:var(--mono); font-size:10.5px; color:var(--muted); font-variant-numeric:tabular-nums}
+.after .steps li{
+  border-left-color:var(--accent); background:var(--accent-soft);
+  color:var(--ink); font-weight:600; font-size:15px; padding:11px 12px;
 }
-.col.before .steps li{border-left:3px solid var(--pain)}
-.col.after  .steps li{
-  border-left:3px solid var(--accent);
-  background:var(--accent-soft);
-  color:var(--ink); font-weight:500;
-}
-.after-note{
-  margin-top:16px; padding:16px 18px;
+.gain{
+  margin-top:14px; padding:16px 16px 18px;
   border:1px dashed var(--line); color:var(--muted);
-  font-size:14px; flex:1; display:flex; align-items:center;
+  font-size:14px; line-height:1.5;
 }
-.after-note strong{color:var(--ink); font-weight:600}
+.gain b{color:var(--ink); font-weight:600}
 
-/* появление шагов — тянущийся список и есть аргумент */
-.reveal .steps li{opacity:0; transform:translateY(6px)}
-.reveal.on .steps li{
-  opacity:1; transform:none;
-  transition:opacity .34s ease, transform .34s ease;
-  transition-delay:calc(var(--i) * 90ms);
+/* footer */
+.foot{
+  display:grid; grid-template-columns:repeat(3,1fr) 1.25fr;
+  border-top:1px solid var(--line); background:var(--surface);
 }
-
-/* ---------- механика ---------- */
-.how{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line)}
-.how-cell{background:var(--ground); padding:26px 24px 30px}
-.how-cell .ref{
-  font-family:var(--mono); font-size:11px; color:var(--accent);
-  letter-spacing:.06em; display:block; margin-bottom:14px;
+.fcell{padding:18px 22px; border-right:1px solid var(--line)}
+.fcell:last-child{border-right:none; background:var(--surface-2)}
+.fcell h4{
+  font-family:var(--mono); font-weight:600; font-size:14px;
+  margin:0 0 5px; letter-spacing:-.015em;
 }
-.how-cell h4{
-  font-family:var(--mono); font-weight:600; font-size:16px;
-  margin:0 0 9px; letter-spacing:-.015em;
-}
-.how-cell p{margin:0; font-size:14.5px; color:var(--ink-2)}
-
-/* ---------- оговорка ---------- */
-.caveat{display:grid; grid-template-columns:auto 1fr; gap:20px; align-items:start}
-.caveat .mark{
-  font-family:var(--cond); font-weight:700; font-size:30px;
-  color:var(--muted); line-height:1;
-}
-.caveat p{margin:0; color:var(--ink-2); max-width:62ch; font-size:15px}
-
-/* ---------- футер ---------- */
-.foot .body{padding-top:26px; padding-bottom:30px}
-.meta{
-  display:flex; flex-wrap:wrap; gap:8px;
-  font-family:var(--mono); font-size:12px; color:var(--muted);
-}
-.meta span{
-  border:1px solid var(--line); background:var(--surface);
-  padding:4px 10px; border-radius:2px;
-}
-
-@media (max-width:760px){
-  :root{--cell:38px}
-  .pains,.compare,.how{grid-template-columns:1fr}
-  .body{padding:26px 20px 30px}
-  .colhead{display:none}
-  .col{padding:24px 20px 28px}
-}
-@media (prefers-reduced-motion:reduce){
-  .reveal .steps li{opacity:1; transform:none}
-  .reveal.on .steps li{transition:none}
-}
+.fcell p{margin:0; font-size:13px; line-height:1.45; color:var(--ink-2)}
+.fcell.note h4{color:var(--muted); font-family:var(--cond); font-weight:700;
+  font-size:11px; letter-spacing:.16em; text-transform:uppercase}
+.fcell.note b{color:var(--ink); font-weight:600}
 </style>
 
-<div class="sheet">
+<div class="stage">
+<div class="slide" id="slide">
 
-  <div class="chrome">
-    <div class="formula-bar">
-      <span class="namebox">A1</span>
-      <span class="fx">fx</span>
-      <span class="val">=ОТКРЫТЬ("выгрузка.xlsx")</span>
+  <div class="bar">
+    <span class="namebox">A1</span>
+    <span class="fx">fx</span>
+    <span>=OPEN("balance_report.xlsx")</span>
+    <span class="brand">Open in Google Sheets</span>
+  </div>
+
+  <div class="main">
+
+    <div class="left">
+      <p class="eyebrow">The problem</p>
+      <h1><span class="selected">Every .xlsx opens in the wrong app</span></h1>
+      <p class="lede">Your export lands in Downloads. A double-click hands it to <b>Numbers</b> — but the work happens in Google Sheets. So you close it and move the file across by hand. <b>Every single time.</b></p>
+      <div class="pains">
+        <div class="pain"><b>No sharing</b><span>Numbers gives you a file to email around — not a link, comments, and two people in the same sheet.</span></div>
+        <div class="pain"><b>No Excel</b><span>Without Office installed there is no second option. Dragging each file into Drive is the whole workflow.</span></div>
+      </div>
     </div>
-    <div class="colhead">
-      <span></span><span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span><span>G</span><span>H</span>
+
+    <div class="right">
+
+      <div class="col before">
+        <div class="chead">
+          <div class="bignum">7</div>
+          <div><div class="clabel">Before</div><div class="csub">steps, per file</div></div>
+        </div>
+        <ol class="steps">
+          <li><span class="n">01</span><span>Export the .xlsx</span></li>
+          <li><span class="n">02</span><span>Double-click — Numbers opens</span></li>
+          <li><span class="n">03</span><span>Close Numbers</span></li>
+          <li><span class="n">04</span><span>Open drive.google.com</span></li>
+          <li><span class="n">05</span><span>Drag the file into Drive</span></li>
+          <li><span class="n">06</span><span>Wait for the upload</span></li>
+          <li><span class="n">07</span><span>Right-click → Open with → Google Sheets</span></li>
+        </ol>
+      </div>
+
+      <div class="col after">
+        <div class="chead">
+          <div class="bignum">1</div>
+          <div><div class="clabel">After</div><div class="csub">step, per file</div></div>
+        </div>
+        <ol class="steps">
+          <li><span class="n">01</span><span>Double-click</span></li>
+        </ol>
+        <div class="gain">The file uploads to Drive, becomes a Google Sheet and opens in a tab on its own. <b>Steps 2 through 7 are gone.</b></div>
+      </div>
+
     </div>
   </div>
 
-  <section class="row hero">
-    <div class="rownum">1</div>
-    <div class="body">
-      <p class="eyebrow"><span class="ref">A1</span> · в чём боль</p>
-      <h1><span class="selected">Каждый .xlsx открывается не там</span></h1>
-      <p class="lede">Выгрузка из бэк-офиса падает в «Загрузки». Двойной клик отдаёт её <b>Numbers</b> — а вся работа идёт в Google Таблицах. Дальше начинается ручной круг: закрыть, открыть Drive, перетащить, дождаться, открыть заново. <b>И так с каждым файлом.</b></p>
+  <div class="foot">
+    <div class="fcell">
+      <h4>Lives in the menu bar</h4>
+      <p>While it runs, it owns .xlsx and .xls instead of Numbers.</p>
     </div>
-  </section>
-
-  <section class="row">
-    <div class="rownum">2</div>
-    <div class="pains">
-      <div class="pain-cell">
-        <span class="tag">боль № 1</span>
-        <h3>Открывается то, чем никто не пользуется</h3>
-        <p>Команда живёт в Google Таблицах: ссылка, комментарии, совместное редактирование, история версий.</p>
-        <p>Из Numbers ничего этого не отдать. Только переслать копию файла — и дальше собирать правки из четырёх разных копий.</p>
-      </div>
-      <div class="pain-cell">
-        <span class="tag">боль № 2</span>
-        <h3>Без Office на маке альтернативы нет</h3>
-        <p>Excel не стоит, ставить ради пары выгрузок в месяц незачем. Остаётся один путь до нормальной таблицы — каждый раз тащить файл в Drive руками.</p>
-        <p>Каждый файл. Каждый день. Одними и теми же семью движениями.</p>
-      </div>
+    <div class="fcell">
+      <h4>Uploads and opens</h4>
+      <p>Into Drive, converted to a Sheet, tab opens by itself.</p>
     </div>
-  </section>
-
-  <section class="row">
-    <div class="rownum">3</div>
-    <div class="compare">
-
-      <div class="col before reveal" id="before">
-        <div class="col-head">
-          <div class="bignum">7</div>
-          <div>
-            <div class="col-label">Было</div>
-            <div class="col-sub">действий на один файл</div>
-          </div>
-        </div>
-        <ol class="steps">
-          <li style="--i:0"><span class="n">01</span><span>Выгрузил .xlsx из бэк-офиса</span></li>
-          <li style="--i:1"><span class="n">02</span><span>Двойной клик — открылся Numbers</span></li>
-          <li style="--i:2"><span class="n">03</span><span>Закрыл Numbers</span></li>
-          <li style="--i:3"><span class="n">04</span><span>Открыл drive.google.com</span></li>
-          <li style="--i:4"><span class="n">05</span><span>Перетащил файл в Drive</span></li>
-          <li style="--i:5"><span class="n">06</span><span>Дождался загрузки</span></li>
-          <li style="--i:6"><span class="n">07</span><span>Правый клик → Открыть с помощью → Google Таблицы</span></li>
-        </ol>
-      </div>
-
-      <div class="col after reveal" id="after">
-        <div class="col-head">
-          <div class="bignum">1</div>
-          <div>
-            <div class="col-label">Стало</div>
-            <div class="col-sub">действие на один файл</div>
-          </div>
-        </div>
-        <ol class="steps">
-          <li style="--i:0"><span class="n">01</span><span>Двойной клик</span></li>
-        </ol>
-        <div class="after-note">
-          <p style="margin:0">Файл сам уезжает в Drive, превращается в Google Таблицу и открывается во вкладке. <strong>Шагов 2–7 больше нет.</strong></p>
-        </div>
-      </div>
-
+    <div class="fcell">
+      <h4>Quit and it's undone</h4>
+      <p>“Quit and restore Numbers” puts everything back.</p>
     </div>
-  </section>
-
-  <section class="row">
-    <div class="rownum">4</div>
-    <div class="body" style="padding-bottom:22px">
-      <p class="eyebrow"><span class="ref">D4</span> · как это устроено</p>
+    <div class="fcell note">
+      <h4>One honest caveat</h4>
+      <p>Drive gets a <b>copy</b>. Google Sheets cannot edit a local file, so edits in the Sheet do not flow back into the .xlsx on disk.</p>
     </div>
-  </section>
+  </div>
 
-  <section class="row">
-    <div class="rownum">5</div>
-    <div class="how">
-      <div class="how-cell">
-        <span class="ref">A5</span>
-        <h4>Висит в строке меню</h4>
-        <p>Маленькая иконка таблицы в трее. Пока приложение запущено, оно и есть обработчик .xlsx и .xls вместо Numbers.</p>
-      </div>
-      <div class="how-cell">
-        <span class="ref">B5</span>
-        <h4>Заливает и открывает</h4>
-        <p>Файл уходит в Google Drive в папку «Finder Uploads», конвертируется в Таблицу, вкладка открывается сама.</p>
-      </div>
-      <div class="how-cell">
-        <span class="ref">C5</span>
-        <h4>Выключается одним пунктом</h4>
-        <p>«Выйти и вернуть Numbers» — и всё ровно как было. В системе ничего не остаётся.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="row">
-    <div class="rownum">6</div>
-    <div class="body">
-      <p class="eyebrow">честная оговорка</p>
-      <div class="caveat">
-        <div class="mark">↯</div>
-        <p>В Drive создаётся <b>копия</b>. Google Sheets не умеет редактировать локальный файл, поэтому правки в Таблице не возвращаются в .xlsx на диске. Для выгрузок, которые всё равно живут дальше в Таблицах, это ровно то, что нужно — но помнить об этом стоит.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="row foot">
-    <div class="rownum">7</div>
-    <div class="body">
-      <div class="meta">
-        <span>Open in Google Sheets 1.0</span>
-        <span>macOS 13+</span>
-        <span>Apple Silicon</span>
-        <span>rclone внутри</span>
-        <span>ставится перетаскиванием в «Программы»</span>
-      </div>
-    </div>
-  </section>
-
+</div>
 </div>
 
 <script>
 (function () {
-  var io = new IntersectionObserver(function (entries) {
-    entries.forEach(function (e) {
-      if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); }
-    });
-  }, { threshold: 0.25 });
-  document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+  var slide = document.getElementById('slide');
+  function fit() {
+    var pad = window.innerWidth > 700 ? 32 : 8;
+    var s = Math.min((window.innerWidth - pad) / 1600, (window.innerHeight - pad) / 690);
+    slide.style.transform = 'scale(' + s + ')';
+  }
+  fit();
+  window.addEventListener('resize', fit);
 })();
 </script>
