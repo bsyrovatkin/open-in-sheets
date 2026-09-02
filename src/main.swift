@@ -93,7 +93,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: Lifecycle
 
     func applicationDidFinishLaunching(_ n: Notification) {
+        let t0 = Date()
         log("launched from \(Bundle.main.bundlePath)")
+        defer { log(String(format: "startup took %.2fs", Date().timeIntervalSince(t0))) }
         buildStatusItem()
         guard ensureInApplicationsFolder() else { return }
         takeOverHandlers()
@@ -375,16 +377,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         setBusy(true)
         DispatchQueue.global().async {
-            let stamp = ISO8601DateFormatter().string(from: Date())
-                .replacingOccurrences(of: ":", with: "-")
-            let dest = "\(kRemote):\(kDriveFolder)/\(stamp)-\(Int.random(in: 1000...9999))"
+            let tStart = Date()
+            // One folder per day rather than per file: creating a fresh Drive folder costs
+            // about three seconds, and that is a third of the whole round trip.
+            let day = DateFormatter()
+            day.dateFormat = "yyyy-MM-dd"
+            let dest = "\(kRemote):\(kDriveFolder)/\(day.string(from: Date()))"
 
             let copy = run(self.rclonePath, [
                 "copy", url.path, "\(dest)/",
                 "--drive-import-formats", "xlsx,xls",
-                "--drive-chunk-size", "16M",
+                "--ignore-times",
                 "--retries", "2",
             ], timeout: 900)
+
+            let tCopy = Date()
+            log(String(format: "rclone copy: %.2fs", tCopy.timeIntervalSince(tStart)))
 
             guard copy.code == 0 else {
                 DispatchQueue.main.async {
@@ -397,10 +405,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
 
             let list = run(self.rclonePath, ["lsjson", dest, "--files-only"], timeout: 120)
+            log(String(format: "rclone lsjson: %.2fs", Date().timeIntervalSince(tCopy)))
+            // The day folder holds every upload made today, and an import strips the
+            // extension, so match on the base name and take the most recent one.
+            let base = url.deletingPathExtension().lastPathComponent
             var fileID: String?
             if let data = list.out.data(using: .utf8),
                let arr = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
-                fileID = arr.first?["ID"] as? String
+                // rclone lists an imported Google Sheet with a virtual ".xlsx" extension,
+                // so strip any extension before comparing with the local base name.
+                let mine = arr.filter {
+                    guard let n = $0["Name"] as? String else { return false }
+                    return n == base || (n as NSString).deletingPathExtension == base
+                }
+                let newest = mine.max { a, b in
+                    (a["ModTime"] as? String ?? "") < (b["ModTime"] as? String ?? "")
+                }
+                fileID = (newest ?? arr.last)?["ID"] as? String
             }
 
             DispatchQueue.main.async {
@@ -410,7 +431,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                           "Check the “\(kDriveFolder)” folder in Google Drive.")
                     return
                 }
-                log("uploaded \(url.lastPathComponent) -> \(id)")
+                log(String(format: "uploaded %@ -> %@ (total %.2fs)",
+                           url.lastPathComponent, id, Date().timeIntervalSince(tStart)))
                 NSWorkspace.shared.open(
                     URL(string: "https://docs.google.com/spreadsheets/d/\(id)/edit")!)
             }
